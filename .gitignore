@@ -1,0 +1,25 @@
+.build/
+.swiftpm/
+build/
+.DS_Store
+
+# Local credentials, signing material, and runtime data
+.env
+.env.*
+!.env.example
+auth.json
+workspace.json
+*.p8
+*.p12
+*.key
+*.pem
+*.mobileprovision
+*.provisionprofile
+*.log
+/ChatGPT/
+/Assistant/
+
+# Xcode user state
+DerivedData/
+xcuserdata/
+*.xcuserstate
