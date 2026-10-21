@@ -20,6 +20,10 @@ A native macOS assistant for screen context, conversations, and presentations.
 
 </div>
 
+## About this project
+
+Lumen is a personal software project inspired by existing desktop assistants. The original concept is not mine; this repository explores an independent implementation in Swift and SwiftUI, combining screen context, conversations, local notes, and presentation tools.
+
 ## Made for the moment
 
 Keep a question, a conversation, or the next line of your presentation close at hand.
