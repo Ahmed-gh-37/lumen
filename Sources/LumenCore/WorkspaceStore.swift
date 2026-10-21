@@ -22,7 +22,7 @@ public final class WorkspaceStore: @unchecked Sendable {
         } catch let error as CocoaError where error.code == .fileReadNoSuchFile {
             return WorkspaceData()
         }
-        // Decode errors propagate. A damaged or newer workspace must never be silently replaced.
+        // Leave unreadable or unsupported workspaces intact.
         let data = try JSONDecoder().decode(WorkspaceData.self, from: bytes)
         guard data.version == 1 else { throw WorkspaceStoreError.unsupportedVersion(data.version) }
         return data

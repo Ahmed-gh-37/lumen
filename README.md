@@ -2,11 +2,11 @@
 
 # Lumen
 
-### A little clarity, right where you work.
+### Screen context, notes, and a teleprompter for macOS.
 
-A native macOS assistant for screen context, conversations, and presentations.
+Ask about your screen, transcribe a conversation, or follow a presentation script from a floating panel or the notch.
 
-[Get started](#get-started) · [Features](#made-for-the-moment) · [User guide](docs/guide.md) · [Privacy](docs/privacy.md) · [Development](#development)
+[Get started](#get-started) · [Features](#features) · [User guide](docs/guide.md) · [Privacy](docs/privacy.md) · [Development](#development)
 
 <br>
 
@@ -22,22 +22,20 @@ A native macOS assistant for screen context, conversations, and presentations.
 
 ## About this project
 
-Lumen is a personal software project inspired by existing desktop assistants. The original concept is not mine; this repository explores an independent implementation in Swift and SwiftUI, combining screen context, conversations, local notes, and presentation tools.
+Lumen is a personal project inspired by existing desktop assistants. The original idea isn't mine; this is an independent implementation in Swift and SwiftUI.
 
 If this project's name creates confusion with an existing project or product, please open an issue. I'm happy to choose a different name.
 
-## Made for the moment
-
-Keep a question, a conversation, or the next line of your presentation close at hand.
+## Features
 
 | | What you can do |
 | :--- | :--- |
-| **Ask** | Stream answers, attach a screen, revisit a conversation, and bring in selected transcript context. |
-| **See** | Explain the selected display with a shortcut. Start a minute-by-minute session for up to 60 screenshots. |
+| **Ask** | Chat with your chosen provider, attach a screenshot, and include live transcript context. |
+| **Screen** | Explain the selected display with a shortcut, or send one screenshot per minute for up to 60 captures. |
 | **Listen** | Transcribe microphone or system audio with Apple's on-device speech recognition. Save completed sessions to local notes. |
-| **Present** | Paste a script and follow your voice, or use timed scrolling. Pause, restart, and adjust the reading size. |
-| **Keep** | Search, tag, favorite, and archive notes. Export Markdown or PDF. Preview summaries before applying them. |
-| **Make it yours** | Switch between a floating window and notch mode. Adjust transparency, change shortcuts, and toggle mouse click-through. |
+| **Teleprompter** | Read a script with voice follow or timed scrolling. Adjust the text size and restart when needed. |
+| **Notes** | Search, tag, favorite, and archive notes. Preview generated summaries and export Markdown or PDF. |
+| **Overlay** | Switch between floating and notch layouts, adjust opacity, set shortcuts, and let mouse clicks pass through. |
 
 ## Get started
 
@@ -58,7 +56,7 @@ open build/Lumen.app
 
 Lumen lives in the menu bar. Use its menu to reopen the panel, return from click-through mode, or quit.
 
-### Choose your connection
+### Connections
 
 | Connection | Sign-in | Usage |
 | :--- | :--- | :--- |
@@ -68,7 +66,7 @@ Lumen lives in the menu bar. Use its menu to reopen the panel, return from click
 
 ChatGPT uses a separate Lumen sign-in profile. It does not import your ChatGPT history, memories, or existing Codex settings. Available models depend on the connected account and installed helper. Gemini and Claude model IDs are editable in Settings. See [connections and permissions](docs/guide.md#connections).
 
-## At your fingertips
+## Shortcuts
 
 Every shortcut can be changed or removed in **Settings → Shortcuts**. These are the defaults:
 
@@ -82,13 +80,15 @@ Every shortcut can be changed or removed in **Settings → Shortcuts**. These ar
 | Teleprompter play / pause | ⌥⌘T |
 | Ask / Listen / Notes | ⌥⌘A / ⌥⌘L / ⌥⌘N |
 
-**Notch mode** expands on hover and stays open while the teleprompter runs. Choose its width and 2–8 reading lines. A general toggle returns to the floating window; automatic switching when playback starts is optional.
+## Screen and presentation tools
+
+**Notch mode** expands on hover and stays open while the teleprompter runs. Choose its width and 2–8 reading lines. Use the notch button to return to the floating window, or enable automatic switching when playback starts.
 
 **Voice follow** advances when nearby spoken words match your script. Silence and unrelated speech do not advance it. Recognition can lag or mishear, and matching words from another speaker can move the script. Timed mode needs no microphone.
 
 **Automatic screen explanations** send immediately, then attempt one capture each minute. Busy minutes are skipped; responses never overlap. The session stops at 60 successful sends, on an error, when paused or disconnected, or when Lumen quits. It never resumes automatically on launch.
 
-## Your data, on your Mac
+## Data and privacy
 
 Notes, chat text, scripts, and preferences are saved locally. Optional API keys use macOS Keychain. Screenshots and raw audio are not saved to the workspace. AI requests transmit the text, context, and images used for that request to the chosen provider.
 
@@ -98,7 +98,7 @@ Read the [data and privacy guide](docs/privacy.md) for storage locations, permis
 
 ## Development
 
-The app and its core library are separate SwiftPM targets. Window management, capture, and views live in `Lumen`; persistence, provider clients, scheduling, and script matching live in `LumenCore`.
+The `Lumen` target contains the app, capture, and views. `LumenCore` contains persistence, provider clients, scheduling, and script matching.
 
 ```text
 Sources/
@@ -117,9 +117,9 @@ bash scripts/package-app.sh
 
 Tests cover core behavior and provider protocols using fixtures. An installed Codex helper also gets an unauthenticated compatibility check; it is skipped when the helper is absent. Tests do not send authenticated AI requests or establish microphone accuracy or capture exclusion in third-party apps.
 
-Packaging builds for the host architecture and uses an available signing certificate, with an ad-hoc fallback. It does not notarize, install, or publish the app. A stable signing identity helps macOS retain permission grants between builds. See [building and signing](docs/guide.md#building-and-signing).
+Packaging builds for the host architecture and uses an available signing certificate, with an ad-hoc fallback. The output is a local build, without notarization or an installer. A stable signing identity helps macOS retain permission grants between builds. See [building and signing](docs/guide.md#building-and-signing).
 
-For a change, keep the affected feature small, run the tests, and package the app. Use the checked-in formatting configuration:
+Format Swift files with the checked-in configuration:
 
 ```sh
 swift format format --in-place --recursive Sources Tests Package.swift

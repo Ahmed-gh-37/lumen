@@ -24,7 +24,6 @@ final class ScreenCapture {
         }
     }
 
-    /// Called only after the person chooses to analyze their screen.
     func capture(displayID: CGDirectDisplayID?) async throws -> CapturedScreen {
         let content = try await ScreenCaptureAccess.content()
         try Task.checkCancellation()
@@ -35,7 +34,7 @@ final class ScreenCapture {
         let ownApps = content.applications.filter { $0.processID == ProcessInfo.processInfo.processIdentifier }
         let filter = SCContentFilter(display: display, excludingApplications: ownApps, exceptingWindows: [])
         let configuration = SCStreamConfiguration()
-        // Bound memory and image payload size while retaining the display's aspect ratio.
+        // Limit the longest edge to 2048 pixels without changing the aspect ratio.
         let width = max(1, CGDisplayPixelsWide(display.displayID))
         let height = max(1, CGDisplayPixelsHigh(display.displayID))
         let scale = min(1.0, 2048.0 / Double(max(width, height)))
@@ -60,8 +59,7 @@ final class ScreenCapture {
 @MainActor
 enum ScreenCaptureAccess {
     static func content() async throws -> SCShareableContent {
-        // ScreenCaptureKit owns the permission decision. A legacy CoreGraphics
-        // preflight result must not veto a working modern capture session.
+        // CoreGraphics preflight can report denial even when ScreenCaptureKit has access.
         do { return try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true) } catch {
             throw describe(error)
         }

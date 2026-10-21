@@ -21,8 +21,7 @@ public enum ChatGPTClientError: LocalizedError, Equatable {
     }
 }
 
-/// Owns a private, local Codex app-server. Authentication stays in app-server;
-/// this client never reads credentials or the user's existing Codex settings.
+/// Connects to a local Codex app-server with a separate sign-in profile.
 public actor ChatGPTClient {
     private let homeDirectory: URL
     private let workingDirectory: URL
@@ -229,8 +228,7 @@ public actor ChatGPTClient {
         } catch {
             guard active?.token == token else { return }
             if active?.threadID != nil {
-                // A timed-out or cancelled turn/start may still be running upstream.
-                // Stop our connection so it cannot continue as an orphaned answer.
+                // turn/start may have succeeded before the timeout or cancellation.
                 stop(with: error)
             } else {
                 finishStream(throwing: error)
@@ -287,7 +285,7 @@ public actor ChatGPTClient {
             "--disable", "view_image", "--disable", "workspace_dependencies",
             "--disable", "sleep_tool", "--disable", "goals",
         ]
-        // Pass system process essentials, never provider secrets or inherited Codex overrides.
+        // Exclude inherited credentials and Codex overrides from the child environment.
         let allowed = ["PATH", "HOME", "USER", "LOGNAME", "TMPDIR", "LANG", "LC_ALL", "LC_CTYPE", "SHELL"]
         var environment = ProcessInfo.processInfo.environment.filter { allowed.contains($0.key) }
         environment["CODEX_HOME"] = homeDirectory.path
@@ -312,7 +310,7 @@ public actor ChatGPTClient {
             await self?.processEnded(generation: session)
         }
         errorTask = Task.detached {
-            // Drain stderr so a full pipe cannot stall the server. Never log auth material.
+            // Drain the pipe without retaining output that may contain sign-in details.
             let handle = stderrPipe.fileHandleForReading
             while !Task.isCancelled {
                 guard !handle.availableData.isEmpty else { break }
@@ -398,7 +396,7 @@ public actor ChatGPTClient {
     private func handle(_ message: [String: Any]) {
         if let method = message["method"] as? String {
             if let id = message["id"] {
-                // No dynamic tool, approval, elicitation, or external token request is executable here.
+                // Lumen implements no server-initiated tool or approval handlers.
                 try? write([
                     "id": id, "error": ["code": -32601, "message": "Lumen does not provide tools or approvals."],
                 ])
@@ -496,7 +494,7 @@ public actor ChatGPTClient {
             nextID += 1
             try? write(["method": "turn/interrupt", "id": nextID, "params": ["threadId": threadID, "turnId": turnID]])
         }
-        // Closing our owned process also covers cancellation while turn/start is in flight.
+        // Also cancel turns whose turn/start response has not arrived yet.
         stop(with: CancellationError())
     }
 

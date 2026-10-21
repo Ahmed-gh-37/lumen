@@ -200,8 +200,7 @@ final class ChatGPTClientTests: XCTestCase {
             workingDirectory: root.appendingPathComponent("workspace"),
             executableURL: URL(fileURLWithPath: path), requestTimeout: 10)
         clients.append(client)
-        // Empty private CODEX_HOME; this performs only initialize/initialized/account/read.
-        // It never starts login, discovers models, or requests inference.
+        // Check the installed protocol using an empty profile, without signing in or generating.
         let account = try await client.checkAccount()
         XCTAssertFalse(account.isSignedIn)
     }
